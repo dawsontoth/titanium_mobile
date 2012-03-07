@@ -1299,9 +1299,6 @@ if ([str isEqualToString:@#orientation]) return (UIDeviceOrientation)orientation
 			{
 				appurlstr = [appurlstr substringFromIndex:1];
 			}
-#ifdef DEBUG			
-			NSLog(@"[DEBUG] loading: %@, resource: %@",urlstring,appurlstr);
-#endif			
 			return [AppRouter performSelector:@selector(resolveAppAsset:) withObject:appurlstr];
 		}
 	}

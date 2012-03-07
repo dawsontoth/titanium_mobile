@@ -53,9 +53,6 @@
 		// only allow includes that are local to our execution context url
 		// for security, refuse to load non-compiled in Javascript code
 		NSURL *url = [TiUtils toURL:file relativeToURL:rootURL];
-#ifdef DEBUG
-		NSLog(@"[DEBUG] include url: %@",[url absoluteString]);
-#endif
 		[context setCurrentURL:url];
 		[context evalFile:[url absoluteString]];
 	}
