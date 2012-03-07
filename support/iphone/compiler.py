@@ -151,10 +151,10 @@ def softlink_resources(source,target,use_ignoreDirs=True):
 		from_ = os.path.join(source, file)
 		to_ = os.path.join(target, file)
 		if os.path.isdir(from_):
-			print "[DEBUG] creating: %s" % (to_)
+			# print "[DEBUG] creating: %s" % (to_)
 			softlink_resources(from_,to_,False)
 		else:
-			print "[DEBUG] linking: %s to %s" % (from_,to_)
+			# print "[DEBUG] linking: %s to %s" % (from_,to_)
 			if os.path.exists(to_):
 				if os.path.islink(to_):
 					os.remove(to_)
@@ -593,7 +593,7 @@ class Compiler(object):
 					else:
 						# only copy if different filesize or doesn't exist
 						if not os.path.exists(to_) or os.path.getsize(from_)!=os.path.getsize(to_):
-							print "[DEBUG] copying: %s to %s" % (from_,to_)
+							# print "[DEBUG] copying: %s to %s" % (from_,to_)
 							shutil.copyfile(from_, to_)	
 		
 			if compiled_targets.has_key('.html'):
@@ -603,7 +603,7 @@ class Compiler(object):
 						from_ = c['from']
 						to_ = c['to']
 						path = c['path']
-						print "[DEBUG] copying: %s to %s" % (from_,to_)
+						# print "[DEBUG] copying: %s to %s" % (from_,to_)
 						file_contents = open(from_).read()
 						file_contents = jspacker.jsmin(file_contents)
 						file_contents = file_contents.replace('Titanium.','Ti.')
@@ -616,7 +616,7 @@ class Compiler(object):
 					for css_file in compiled_targets[ext]:
 						from_ = css_file['from']
 						to_ = css_file['to']
-						print "[DEBUG] copying: %s to %s" % (from_,to_)
+						# print "[DEBUG] copying: %s to %s" % (from_,to_)
 						if path.endswith('.css'):
 							file_contents = open(from_).read()
 							packer = CSSPacker(file_contents)

@@ -55,7 +55,7 @@ def copy_resources(source, target):
 				to_directory = os.path.expanduser(split(to_)[0])
 				if not exists(to_directory):
 					 os.makedirs(to_directory)
-				print "[TRACE] copying: %s to: %s" % (from_,to_)
+				# print "[TRACE] copying: %s to: %s" % (from_,to_)
 				copyfile(from_, to_)
 	
 class Android(object):

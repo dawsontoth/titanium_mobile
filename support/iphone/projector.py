@@ -56,7 +56,7 @@ class Projector(object):
 		# first deal with the filename
 		target_filename = self.form_target_filename(target)
 		
-		print "[DEBUG] processing %s => %s" % (source,target_filename)
+		# print "[DEBUG] processing %s => %s" % (source,target_filename)
 
 		content = codecs.open(source,'r','utf-8','replace').read()
 	
@@ -119,7 +119,7 @@ class Projector(object):
 				if not processed:	
 				 	if os.path.exists(to_):
 				 		os.remove(to_)
-				 	print "[DEBUG] copying: %s => %s" % (from_,to_)
+				 	# print "[DEBUG] copying: %s => %s" % (from_,to_)
 				 	copyfile(from_, to_)
 	
 	def process_xcode(self,content):
