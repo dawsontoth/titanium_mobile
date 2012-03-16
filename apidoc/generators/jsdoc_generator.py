@@ -223,6 +223,9 @@ def convert_type_to_string(val):
 		return "%s)}" % retVal[:-1]
 	if val.find("Dictionary<") != -1:
 		return "!Object"
+	if val.find("Callback<") != -1:
+		log.info("PARSED: function(%s)" % val[9:-1])
+		return "function(%s)" % val[9:-1]
 	return val.replace("<", ".<")
 
 def get_def_value_for_type(type):
