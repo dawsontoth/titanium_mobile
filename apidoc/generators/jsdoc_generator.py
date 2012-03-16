@@ -192,40 +192,41 @@ def get_jsdoc_for_object(original, object):
 		if object["type"] == "module":
 			retVal = "%s\n * @interface" % (retVal)
 		else:
-			retVal = "%s\n * @type {%s}" % (retVal, convert_type_to_string(object))
+			retVal = "%s\n * @type {%s}" % (retVal, convert_type_to_string(object, 0))
 	
 	if "subtype" in object and object["subtype"] != None:
 		retVal = "%s\n * @extends Titanium.%s%s" % (retVal, object["subtype"][0].capitalize(), object["subtype"][1:])
 	
 	if "parameters" in object and object["parameters"] != None:
 		for parameter in object["parameters"]:
-			type = convert_type_to_string(parameter)
+			type = convert_type_to_string(parameter, 1)
 			optional = ""
 			if parameter["optional"]:
 				optional = "="
 			retVal = "%s\n * @param {%s%s} %s\t%s" % (retVal, type, optional, parameter["name"], parameter["summary"])
 	
 	if "returns" in object and object["returns"] != None:
-		retVal = "%s\n * @return {%s}" % (retVal, convert_type_to_string(object["returns"]))
+		retVal = "%s\n * @return {%s}" % (retVal, convert_type_to_string(object["returns"], 0))
 	
 	return "%s\n/**\n *%s\n */" % (original, retVal)
 
-def convert_type_to_string(val):
+def convert_type_to_string(val, lenient):
 	if type(val) is dict:
 		val = val["type"]
 	if type(val) is list:
 		retVal = "{("
 		for v in val:
 			if type(v) is dict:
-				retVal = "%s%s|" % (retVal, convert_type_to_string(v["type"]))
+				retVal = "%s%s|" % (retVal, convert_type_to_string(v["type"], lenient))
 			else:
-				retVal = "%s%s|" % (retVal, convert_type_to_string(v))
+				retVal = "%s%s|" % (retVal, convert_type_to_string(v, lenient))
 		return "%s)}" % retVal[:-1]
 	if val.find("Dictionary<") != -1:
 		return "!Object"
 	if val.find("Callback<") != -1:
-		log.info("PARSED: function(%s)" % val[9:-1])
 		return "function(%s)" % val[9:-1]
+	if lenient and val.find("Titanium.") != -1:
+		val = "(%s|Object)" % val
 	return val.replace("<", ".<")
 
 def get_def_value_for_type(type):
