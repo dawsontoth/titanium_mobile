@@ -161,19 +161,22 @@ def transform_one_api(api):
 		transformed["subtype"] = None
 	return transformed
 
+def clean_html_for_comment(html):
+	return html.replace("\n", "\n * ").replace("href=\"Titanium","href=\"http://developer.appcelerator.com/apidoc/mobile/latest/Titanium");
+
 def get_jsdoc_for_object(original, object):
 	retVal = ""
 	if "summary" in object and object["summary"] != None:
-		retVal = "%s\n * %s" % (retVal, object["summary"].replace("\n", "\n * "))
+		retVal = "%s\n * %s" % (retVal, clean_html_for_comment(object["summary"]))
 	if "permission" in object and object["permission"] != None:
 		retVal = "%s\n * (Permission: %s)" % (retVal, object["permission"])
 	if "description" in object and object["description"] != None:
-		retVal = "%s\n * %s" % (retVal, object["description"].replace("\n", "\n * ").replace("href=\"Titanium","href=\"http://developer.appcelerator.com/apidoc/mobile/latest/Titanium"))
+		retVal = "%s\n * %s" % (retVal, clean_html_for_comment(object["description"]))
 	
 	if "examples" in object and object["examples"] != None:
 		retVal = "%s\n * <b>Code Examples:</b><ul>" % (retVal)
 		for example in object["examples"]:
-			retVal = "%s\n * \n * %s" % (retVal, example["description"].replace("\n", "\n * "))
+			retVal = "%s\n * \n * %s" % (retVal, clean_html_for_comment(example["description"]))
 			retVal = "%s\n * <code>%s</code>" % (retVal, example["code"].replace("\n", "\n * ").replace("/*", "\\/*").replace("*/", "*\\/"))
 	
 	if "platforms" in object and object["platforms"] != None:
