@@ -214,13 +214,13 @@ def convert_type_to_string(val, lenient):
 	if type(val) is dict:
 		val = val["type"]
 	if type(val) is list:
-		retVal = "{("
+		retVal = "("
 		for v in val:
 			if type(v) is dict:
 				retVal = "%s%s|" % (retVal, convert_type_to_string(v["type"], lenient))
 			else:
 				retVal = "%s%s|" % (retVal, convert_type_to_string(v, lenient))
-		return "%s)}" % retVal[:-1]
+		return "%s)" % retVal[:-1]
 	if val.find("Dictionary<") != -1:
 		return "!Object"
 	if val.find("Callback<") != -1:
