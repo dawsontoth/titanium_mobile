@@ -203,12 +203,17 @@ def get_jsdoc_for_object(original, object):
 			optional = ""
 			if parameter["optional"]:
 				optional = "="
-			retVal = "%s\n * @param {%s%s} %s\t%s" % (retVal, type, optional, parameter["name"], parameter["summary"])
+			retVal = "%s\n * @param {%s%s} %s\t%s" % (retVal, type, optional, make_name_js_safe(parameter["name"]), parameter["summary"])
 	
 	if "returns" in object and object["returns"] != None:
 		retVal = "%s\n * @return {%s}" % (retVal, convert_type_to_string(object["returns"], 0))
 	
 	return "%s\n/**\n *%s\n */" % (original, retVal)
+
+def make_name_js_safe(name):
+	if name == "default":
+		return "def"
+	return name
 
 def convert_type_to_string(val, lenient):
 	if type(val) is dict:
@@ -222,6 +227,8 @@ def convert_type_to_string(val, lenient):
 				retVal = "%s%s|" % (retVal, convert_type_to_string(v, lenient))
 		return "%s)" % retVal[:-1]
 	if val.find("Dictionary<") != -1:
+		return "!Object"
+	if val.find("Dictionary") != -1:
 		return "!Object"
 	if val.find("Callback<") != -1:
 		return "function(%s)" % val[9:-1]
@@ -267,7 +274,7 @@ def get_properties_for_object(object):
 			args = ""
 			if "parameters" in method and method["parameters"]:
 				for parameter in method["parameters"]:
-					args = "%s%s," % (args, parameter["name"])
+					args = "%s%s," % (args, make_name_js_safe(parameter["name"]))
 				args = args[:-1]
 			retVal = "%s\n\t'%s': function(%s) { }," % (retVal, method["name"], args)
 	
