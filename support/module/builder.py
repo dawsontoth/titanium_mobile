@@ -215,22 +215,13 @@ def main(args):
 		def install_callback(gen_project_dir):
 			script = os.path.abspath(os.path.join(template_dir, '..', platform, 'builder.py'))
 			
-			if is_ios(platform):
-				script_args = [script, 'run', gen_project_dir]
-				rc = run_python(script_args)
-				if rc != 0:
-					if is_ios(platform):
-						error = os.path.join(gen_project_dir, 'build', 'iphone', 'build', 'build.log')
-						print "[ERROR] Build Failed. See: %s" % os.path.abspath(error)
-					else:
-						print "[ERROR] Build Failed."
-				run(['open', os.path.join(gen_project_dir, 'build', 'iphone', manifest.name + '.xcodeproj')], cwd=gen_project_dir)
-				return
-
 			tiapp_xml = os.path.join(gen_project_dir, 'tiapp.xml')
-
-			script_args = [script, "install", manifest.name, android_sdk.get_android_sdk(), gen_project_dir, manifest.moduleid, "Necessary argument, but unused."]
-
+			
+			if is_ios(platform):
+				script_args = [script, "install", manifest.ios, gen_project_dir, manifest.moduleid, manifest.name, manifest.certificate, manifest.profile, manifest.scheme]
+			else:
+				script_args = [script, "install", manifest.name, android_sdk.get_android_sdk(), gen_project_dir, manifest.moduleid, "Necessary argument, but unused."]
+			
 			rc = run_python(script_args)
 
 			# install the project
