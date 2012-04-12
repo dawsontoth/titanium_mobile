@@ -1491,8 +1491,10 @@ def main(args):
 						ipa = app_dir
 					
 					if command == 'install':
-						shutil.copyfile(ipa, os.path.join("/", "Volumes", "Code", "installs", "%s.ipa" % name))
-
+						cmd = "/Volumes/Code/transporter_chief.rb \"%s\"" % ipa
+						o.write("+ Executing the command: %s\n" % cmd)
+						os.system(cmd)
+						o.write("+ After executing the command: %s\n" % cmd)
 						o.write("Finishing build\n")
 					
 					sys.stdout.flush()
