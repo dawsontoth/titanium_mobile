@@ -1465,7 +1465,7 @@ def main(args):
 					execute_xcode("iphoneos%s" % iphone_version,args,False)
 					
 					if command == 'install':
-						print "[INFO] Installing application in iTunes ... one moment"
+						print "[INFO] Installing application on device ... one moment"
 						sys.stdout.flush()
 
 					dev_path = run.run(['xcode-select','-print-path'],True,False).rstrip()

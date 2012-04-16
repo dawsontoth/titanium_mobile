@@ -1551,7 +1551,8 @@ class Builder(object):
 					self.wait_for_device('e')
 					info("Installing application on emulator")
 
-				output = self.run_adb('install', '-r', app_apk)
+				output = self.run_adb('-s', '373471EDACAA00EC', 'install', '-r', app_apk)
+				output = self.run_adb('-s', '4642004311546DBE', 'install', '-r', app_apk)
 				#output = run.run(cmd)
 				if output == None:
 					launch_failed = True
@@ -1662,7 +1663,7 @@ class Builder(object):
 		self.non_orphans = []
 		if install:
 			if self.device_args == None:
-				self.device_args = ['-d']
+				self.device_args = []
 			if keystore == None:
 				deploy_type = 'test'
 			else:
@@ -2119,7 +2120,7 @@ if __name__ == "__main__":
 			s.build_and_run(False, avd_id, debugger_host=debugger_host)
 		elif command == 'install':
 			avd_id = dequote(sys.argv[6])
-			device_args = ['-d']
+			device_args = []
 			if len(sys.argv) >= 8:
 				device_args = ['-s', sys.argv[7]]
 			s.build_and_run(True, avd_id, device_args=device_args)
