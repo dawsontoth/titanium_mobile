@@ -523,14 +523,9 @@ TI_INLINE void waitForMemoryPanicCleared();   //WARNING: This must never be run 
 //TODO: this should be compiled out in production mode
 -(void)showModalError:(NSString*)message
 {
-	if ([TI_APPLICATION_DEPLOYTYPE isEqualToString:@"production"])
-	{
-		NSLog(@"[ERROR] Application received error: %@",message);
-		return;
-	}
-	ENSURE_UI_THREAD(showModalError,message);
-	TiErrorController *error = [[[TiErrorController alloc] initWithError:message] autorelease];
-	[controller presentModalViewController:error animated:YES];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kTiErrorNotification
+                                                        object:self
+                                                      userInfo:[NSDictionary dictionaryWithObject:message forKey:@"message"]];
 }
 
 -(void)attachModal:(UIViewController*)modalController toController:(UIViewController*)presentingController animated:(BOOL)animated

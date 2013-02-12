@@ -389,6 +389,14 @@ extern BOOL const TI_APPLICATION_ANALYTICS;
 	}
 }
 
+-(void)errored:(NSNotification *)notification
+{
+	if ([self _hasListeners:@"error"])
+	{
+		[self fireEvent:@"error" withObject:[notification userInfo]];
+	}
+}
+
 #pragma mark Delegate stuff
 
 -(void)proximityDetectionChanged:(NSNotification*)note
