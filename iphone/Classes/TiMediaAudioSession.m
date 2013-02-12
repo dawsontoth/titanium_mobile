@@ -291,6 +291,14 @@ void TiAudioSessionInputAvailableCallback(void* inUserData, AudioSessionProperty
 	return mode;
 }
 
+-(void)setDucking:(UInt32)mode
+{
+	if ([self isActive]) {
+		DebugLog(@"[WARN] Setting ducking while playing audio... changes will not take effect until audio is restarted.");
+	}
+	AudioSessionSetProperty(kAudioSessionProperty_OtherMixableAudioShouldDuck,sizeof(mode),&mode);
+}
+
 -(void)startAudioSession
 {
 	[lock lock];

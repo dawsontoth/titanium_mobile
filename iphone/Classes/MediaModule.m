@@ -617,6 +617,7 @@ MAKE_SYSTEM_UINT(AUDIO_SESSION_MODE_SOLO_AMBIENT, kAudioSessionCategory_SoloAmbi
 MAKE_SYSTEM_UINT(AUDIO_SESSION_MODE_PLAYBACK, kAudioSessionCategory_MediaPlayback);
 MAKE_SYSTEM_UINT(AUDIO_SESSION_MODE_RECORD, kAudioSessionCategory_RecordAudio);
 MAKE_SYSTEM_UINT(AUDIO_SESSION_MODE_PLAY_AND_RECORD, kAudioSessionCategory_PlayAndRecord);
+MAKE_SYSTEM_UINT(AUDIO_SESSION_MODE_PLAY_AND_RECORD, kAudioSessionCategory_PlayAndRecord);
 
 MAKE_SYSTEM_PROP(MUSIC_MEDIA_TYPE_MUSIC, MPMediaTypeMusic);
 MAKE_SYSTEM_PROP(MUSIC_MEDIA_TYPE_PODCAST, MPMediaTypePodcast);
@@ -1299,6 +1300,11 @@ MAKE_SYSTEM_PROP(VIDEO_FINISH_REASON_USER_EXITED,MPMovieFinishReasonUserExited);
 -(NSNumber*)audioSessionMode
 {
     return [NSNumber numberWithUnsignedInt:[[TiMediaAudioSession sharedSession] sessionMode]];
+}
+
+-(void)setDucking:(NSNumber*)mode
+{
+    [[TiMediaAudioSession sharedSession] setDucking:[mode unsignedIntValue]];
 }
 
 #pragma mark Delegates
