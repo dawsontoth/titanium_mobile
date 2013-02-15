@@ -523,9 +523,6 @@ TI_INLINE void waitForMemoryPanicCleared();   //WARNING: This must never be run 
 //TODO: this should be compiled out in production mode
 -(void)showModalError:(NSString*)message
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kTiErrorNotification
-                                                        object:self
-                                                      userInfo:[NSDictionary dictionaryWithObject:message forKey:@"message"]];
 }
 
 -(void)attachModal:(UIViewController*)modalController toController:(UIViewController*)presentingController animated:(BOOL)animated
