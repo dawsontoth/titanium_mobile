@@ -42,6 +42,31 @@
 	return [[TiApp app] userAgent];
 }
 
+-(void)boot:(NSArray*)jsfiles
+{
+	id<TiEvaluator> context = [self executionContext];
+	
+	// Clean up any previous "boot".
+    id boots = [self valueForKey:@"boots"];
+    if (boots != nil) {
+        for (id boot in boots) {
+            [boot close:nil];
+        }
+    }
+	
+	// Start up the new app.
+	NSURL * rootURL = [self _baseURL];
+	id file = jsfiles[0];
+	NSURL *url = [TiUtils toURL:file proxy:self];
+	NSURL *base = [url URLByDeletingLastPathComponent];
+	[TiUtils overrideBasePath:base];
+	[self _setBaseURL:base];
+	[[self _host] setBaseURL:base];
+	[context setCurrentURL:base];
+	[context evalFile:[url absoluteString]];
+	DebugLog(@"[DEBUG] Booted url: %@",[url absoluteString]);
+}
+
 -(void)include:(NSArray*)jsfiles
 {
 	id<TiEvaluator> context = [self executionContext];

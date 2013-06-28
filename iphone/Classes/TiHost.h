@@ -24,6 +24,7 @@
 
 -(NSString*)appID;
 -(NSURL*)baseURL;
+-(void)setBaseURL:(NSURL*)val;
 -(NSURL*)startURL;
 +(NSString *)resourcePath;
 
