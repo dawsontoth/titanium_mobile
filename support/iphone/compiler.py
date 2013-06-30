@@ -390,10 +390,11 @@ class Compiler(object):
 				defines_content+= "#define TI_VERSION %s\n"%sdk_version
 				for sym in self.defines:
 					defines_content+="#define %s\n" % sym
-
-				if defines_content!=defines_header.read():
-					defines_header.write(defines_content)
-					defines_header.close()
+				
+				# Skip the defines overwrite; we want EVERYTHING! MU HA HA HA HA HA.
+				# if defines_content!=defines_header.read():
+				# 	defines_header.write(defines_content)
+				# 	defines_header.close()
 
 			# deploy any module image files
 			for module in self.modules:
