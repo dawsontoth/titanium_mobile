@@ -530,6 +530,9 @@ DEFINE_EXCEPTIONS
 				scaleUp = YES;
 			}
 			UIImage * resultImage = [UIImage imageWithContentsOfFile:path];
+            if (resultImage == nil) {
+                resultImage = [UIImage imageWithData:[TiUtils loadAppResource:url]];
+            }
 			if (scaleUp && [self imageScale:resultImage]==1.0)
 			{
 				// on the ipad running iphone app in emulation mode, this won't exist when
