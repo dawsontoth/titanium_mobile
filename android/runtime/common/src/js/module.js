@@ -82,7 +82,7 @@ Module.prototype.load = function (filename, source) {
 	this.paths = [path.dirname(filename)];
 
 	if (!source) {
-		source = assets.readAsset(filename);
+		source = assets.readAsset(filename) || assets.readFile(filename);
 	}
 
 	this._runScript(source, filename.replace("Resources/", ""));
@@ -202,6 +202,16 @@ Module.prototype.require = function (request, context, useCache) {
 	var cachedModule;
 	var externalCommonJsContents;
 	var located = false;
+
+	if (request === 'CLEAR-THE-MODULE-CACHE') {
+		Module.cache.length = 0;
+		return;
+	} else if (request.indexOf('ALTER-SEARCH-PATH') === 0) {
+		var newPath = request.substr('ALTER-SEARCH-PATH:'.length);
+		return Module.paths.push(newPath);
+	} else if (request === 'RESET-SEARCH-PATH') {
+		return Module.paths = [ 'Resources/' ];
+	}
 
 	var resolved = this.resolveFilename(request);
 
@@ -402,6 +412,9 @@ Module.prototype.resolveFilename = function (request) {
 	// could be located.
 	for (var i = 0, pathCount = paths.length; i < pathCount; ++i) {
 		var filename = path.resolve(paths[i], id) + '.js';
+		if (filename.indexOf('file:/' === 0)) {
+			filename = filename.replace('file:', '');
+		}
 		if (this.filenameExists(filename) || assets.fileExists(filename)) {
 			return [id, filename];
 		}

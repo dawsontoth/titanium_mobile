@@ -129,7 +129,13 @@ public class KrollAssetHelper
 			}
 		}
 
-		return false;
+		try {
+			FileInputStream in = new FileInputStream(path);
+			boolean retVal = in.read(new byte[1]) != -1;
+			return retVal;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	public static String getPackageName()
