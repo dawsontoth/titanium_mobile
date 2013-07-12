@@ -631,4 +631,5 @@ typedef enum
 
 + (void)overrideBasePath:(NSURL *)path;
 + (NSURL *)overrideBasePath;
++(NSString *)loadOverriddenResource:(NSURL*)url;
 @end

@@ -531,7 +531,10 @@ DEFINE_EXCEPTIONS
 			}
 			UIImage * resultImage = [UIImage imageWithContentsOfFile:path];
             if (resultImage == nil) {
-                resultImage = [UIImage imageWithData:[TiUtils loadAppResource:url]];
+                NSString *ourl = [TiUtils loadOverriddenResource:url];
+                if (ourl != nil) {
+                    resultImage = [UIImage imageWithContentsOfFile:ourl];
+                }
             }
 			if (scaleUp && [self imageScale:resultImage]==1.0)
 			{

@@ -1291,6 +1291,19 @@ static NSURL *overriddenBasePath;
     return overriddenBasePath;
 }
 
++(NSString *)loadOverriddenResource:(NSURL*)url
+{
+    if (overriddenBasePath != nil) {
+		NSString *urlstring = [[url standardizedURL] path];
+        NSString *ourl = [[overriddenBasePath path] stringByAppendingPathComponent:urlstring];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:ourl])
+        {
+            return ourl;
+        }
+    }
+    return nil;
+}
+
 +(NSData *)loadAppResource:(NSURL*)url
 {
 	BOOL app = [[url scheme] hasPrefix:@"app"];
@@ -1308,8 +1321,8 @@ static NSURL *overriddenBasePath;
 		if ([appurlstr hasPrefix:@"/"])
 		{
 			if (overriddenBasePath != nil) {
-				NSString *ourl = [[overriddenBasePath path] stringByAppendingPathComponent:appurlstr];
-				if ([[NSFileManager defaultManager] fileExistsAtPath:ourl])
+				NSString *ourl = [TiUtils loadOverriddenResource:url];
+				if (ourl != nil)
 				{
 					return [NSData dataWithContentsOfFile:ourl];
 				}
