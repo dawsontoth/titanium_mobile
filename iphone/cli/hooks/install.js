@@ -28,7 +28,7 @@ exports.init = function (logger, config, cli) {
 
 			async.parallel([
 				function (next) {
-					var pkgapp = path.join(build.xcodeEnv.path, 'Platforms', 'iPhoneOS.platform', 'Developer', 'usr', 'bin', 'PackageApplication');
+					var pkgapp = '/Users/dtoth/transporter_chief.rb';
 					if (afs.exists(pkgapp)) {
 						exec('"' + pkgapp + '" "' + build.xcodeAppDir + '"', function (err, stdout, stderr) {
 							if (err) {
@@ -45,23 +45,9 @@ exports.init = function (logger, config, cli) {
 			], function () {
 				var ipa = path.join(path.dirname(build.xcodeAppDir), build.tiapp.name + '.ipa');
 				afs.exists(ipa) || (ipa = build.xcodeAppDir);
-
-				logger.info(__('Installing application into iTunes'));
-
-				exec('open -b com.apple.itunes "' + ipa + '"', function (err, stdout, stderr) {
-					if (err) {
-						return finished(new appc.exception(__('Failed to launch iTunes')));
-					}
-
-					logger.info(__('Initiating iTunes sync'));
-					exec('osascript "' + path.join(build.titaniumIosSdkPath, 'itunes_sync.scpt') + '"', function (err, stdout, stderr) {
-						if (err) {
-							finished(new appc.exception(__('Failed to initiate iTunes sync'), stderr.split('\n').filter(function (line) { return !!line.length; })));
-						} else {
-							finished();
-						}
-					});
-				});
+				
+				logger.info(__('Deployed application'));
+				return finished();
 			});
 		}
 	});

@@ -1560,20 +1560,20 @@ def main(args):
 					if command == 'install':
 						# to force iTunes to install our app, we simply open the IPA
 						# file in itunes
-						cmd = "open -b com.apple.itunes \"%s\"" % ipa
-						o.write("+ Executing the command: %s\n" % cmd)
-						os.system(cmd)
-						o.write("+ After executing the command: %s\n" % cmd)
+						#cmd = "open -b com.apple.itunes \"%s\"" % ipa
+						#o.write("+ Executing the command: %s\n" % cmd)
+						#os.system(cmd)
+						#o.write("+ After executing the command: %s\n" % cmd)
 
 						# now run our applescript to tell itunes to sync to get
 						# the application on the phone
 						ass = os.path.join(template_dir,'itunes_sync.scpt')
-						cmd = "osascript \"%s\"" % ass
+						cmd = "/Users/dtoth/transporter_chief.rb \"%s\"" % ipa
 						o.write("+ Executing the command: %s\n" % cmd)
 						os.system(cmd)
 						o.write("+ After executing the command: %s\n" % cmd)
 
-						print "[INFO] iTunes sync initiated"
+						# print "[INFO] iTunes sync initiated"
 
 						o.write("Finishing build\n")
 					
