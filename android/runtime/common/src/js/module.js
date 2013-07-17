@@ -29,7 +29,7 @@ function Module(id, parent, context) {
 }
 kroll.Module = module.exports = Module;
 
-Module.cache = [];
+Module.cache = {};
 Module.main = null;
 Module.paths = [ 'Resources/' ];
 Module.wrap = NativeModule.wrap;
@@ -81,8 +81,13 @@ Module.prototype.load = function (filename, source) {
 	this.filename = filename;
 	this.paths = [path.dirname(filename)];
 
-	if (!source) {
-		source = assets.readAsset(filename) || assets.readFile(filename);
+	try {
+		if (!source) {
+			source = assets.readFile(filename);
+		}
+	}
+	catch (err) {
+		source = assets.readAsset(filename);
 	}
 
 	this._runScript(source, filename.replace("Resources/", ""));
@@ -204,11 +209,15 @@ Module.prototype.require = function (request, context, useCache) {
 	var located = false;
 
 	if (request === 'CLEAR-THE-MODULE-CACHE') {
-		Module.cache.length = 0;
+		var keys = Object.keys(Module.cache);
+		for (var k = 0, kL = keys.length; k < kL; k++) {
+			var key = keys[k];
+			Module.cache[key] = null;
+		}
 		return;
 	} else if (request.indexOf('ALTER-SEARCH-PATH') === 0) {
 		var newPath = request.substr('ALTER-SEARCH-PATH:'.length);
-		return Module.paths.push(newPath);
+		return Module.paths.unshift(newPath);
 	} else if (request === 'RESET-SEARCH-PATH') {
 		return Module.paths = [ 'Resources/' ];
 	}
