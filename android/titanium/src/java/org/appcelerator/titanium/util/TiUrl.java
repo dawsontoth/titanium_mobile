@@ -249,7 +249,7 @@ public class TiUrl
 				String oPath = TiApplication.getInstance().getAppProperties().getString("OVERRIDE_ROOT_PATH", "");
 				String oScheme = TiApplication.getInstance().getAppProperties().getString("OVERRIDE_ROOT_SCHEME", scheme);
 				if (oScheme.length() == 0) oScheme = scheme;
-				result = oScheme + PATH_SEPARATOR + oPath + path;
+				result = oScheme + PATH_SEPARATOR + PATH_SEPARATOR + oPath + path;
 			}
 		} else {
 			result = path;
