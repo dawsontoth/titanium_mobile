@@ -9,6 +9,7 @@ package org.appcelerator.titanium;
 import java.util.LinkedList;
 
 import org.appcelerator.kroll.KrollApplication;
+import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollExceptionHandler;
 import org.appcelerator.kroll.KrollRuntime;
 import org.appcelerator.kroll.common.AsyncResult;
@@ -75,28 +76,15 @@ public class TiExceptionHandler implements Handler.Callback, KrollExceptionHandl
 			Log.w(TAG, "Activity is null or already finishing, skipping dialog.");
 			return;
 		}
-
-		printError(error.title, error.message, error.sourceName, error.line, error.lineSource, error.lineOffset);
-
-		TiApplication tiApplication = TiApplication.getInstance();
-		if (tiApplication.getDeployType().equals(TiApplication.DEPLOY_TYPE_PRODUCTION)) {
-			return;
-		}
-
-		if (!dialogShowing) {
-			dialogShowing = true;
-			final ExceptionMessage fError = error;
-			application.waitForCurrentActivity(new CurrentActivityListener()
-			{
-				// TODO @Override
-				public void onCurrentActivityReady(Activity activity)
-				{
-					createDialog(fError);
-				}
-			});
-		} else {
-			errorMessages.add(error);
-		}
+		
+		KrollDict dict = new KrollDict();
+		dict.put("title", error.title);
+		dict.put("message", error.message);
+		dict.put("sourceName", error.sourceName);
+		dict.put("line", error.line);
+		dict.put("lineSource", error.lineSource);
+		dict.put("lineOffset", error.lineOffset);
+		TiApplication.getInstance().fireAppEvent("error", dict);
 	}
 
 	protected static void createDialog(final ExceptionMessage error)
