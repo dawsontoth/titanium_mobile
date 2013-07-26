@@ -1,7 +1,7 @@
 {
 	"name": "titanium-mobile-deps",
 	"description": "Appcelerator Titanium Mobile dependencies - this file is omitted from distribution",
-	"version": "__VERSION__",
+	"version": "3.1.9",
 	"dependencies": {
 		"async": "0.2.x",
 		"clean-css": "0.6.0",
