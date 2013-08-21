@@ -3,7 +3,7 @@
 # Copyright (c) 2011-2012 Appcelerator, Inc. All Rights Reserved.
 # Licensed under the Apache Public License (version 2)
 
-import sys, json, os, cgi, string
+import sys, json, os
 
 this_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(this_dir, "..")))
@@ -166,32 +166,126 @@ def transform_one_api(api):
 		transformed["subtype"] = None
 	return transformed
 
-def dump_wrapped_annotation(key, val, retVal):
-	if val == None:
-		return retVal
-	elif string.find(val, "\n") == -1:
-		return "%s\n	///	<%s>%s</%s>" % (retVal, key, cgi.escape(val), key)
-	else:
-		return """%s
-	/// <%s>
-	/// 	%s
-	/// </%s>""" % (retVal, key, cgi.escape(val).replace("\n", "\n	/// 	"), key)
+def clean_html_for_comment(html):
+	return html.replace("\n", "\n * ").replace("href=\"Titanium","href=\"http://developer.appcelerator.com/apidoc/mobile/latest/Titanium");
 
-def dump_module(key, module):
+def get_jsdoc_for_object(original, object):
 	retVal = ""
-	retVal = dump_wrapped_annotation("summary", module["summary"], retVal)
-	retVal = dump_wrapped_annotation("remarks", module["description"], retVal)
-	retVal = dump_wrapped_annotation("returns", key, retVal)
-	return retVal
+	if "summary" in object and object["summary"] != None:
+		retVal = "%s\n * %s" % (retVal, clean_html_for_comment(object["summary"]))
+	if "permission" in object and object["permission"] != None:
+		retVal = "%s\n * (Permission: %s)" % (retVal, object["permission"])
+	if "description" in object and object["description"] != None:
+		retVal = "%s\n * %s" % (retVal, clean_html_for_comment(object["description"]))
 	
-def dump(keys, tree, f):
-	f.write("""/*
-* This file has been generated to support Visual Studio IntelliSense. It is
-* only intended to be used only for design-time IntelliSense by an IDE.
-*
-* Comment version: %s
-*/
-""" % "TODO: Insert Platform Version Here")
+	if "examples" in object and object["examples"] != None:
+		retVal = "%s\n * <b>Code Examples:</b><ul>" % (retVal)
+		for example in object["examples"]:
+			retVal = "%s\n * \n * %s" % (retVal, clean_html_for_comment(example["description"]))
+			retVal = "%s\n * <code>%s</code>" % (retVal, example["code"].replace("\n", "\n * ").replace("/*", "\\/*").replace("*/", "*\\/"))
+	
+	if "platforms" in object and object["platforms"] != None:
+		retVal = "%s\n * <b>Platform Availability:</b><ul>" % (retVal)
+		for platform in object["platforms"]:
+			retVal = "%s\n * <li>%s since %s</li>" % (retVal, platform["pretty_name"], platform["since"])
+		retVal = "%s\n * </ul>" % (retVal)
+	
+	if "deprecated" in object and object["deprecated"] != None:
+		retVal = "%s\n * @deprecated" % (retVal)
+	
+	if "type" in object:
+		if object["type"] == "module":
+			retVal = "%s\n * @interface" % (retVal)
+		else:
+			retVal = "%s\n * @type {%s}" % (retVal, convert_type_to_string(object, 0))
+	
+	if "subtype" in object and object["subtype"] != None:
+		retVal = "%s\n * @extends Titanium.%s%s" % (retVal, object["subtype"][0].capitalize(), object["subtype"][1:])
+	
+	if "parameters" in object and object["parameters"] != None:
+		for parameter in object["parameters"]:
+			type = convert_type_to_string(parameter, 1)
+			optional = ""
+			if parameter["optional"]:
+				optional = "="
+			retVal = "%s\n * @param {%s%s} %s\t%s" % (retVal, type, optional, make_name_js_safe(parameter["name"]), parameter["summary"])
+	
+	if "returns" in object and object["returns"] != None:
+		retVal = "%s\n * @return {%s}" % (retVal, convert_type_to_string(object["returns"], 0))
+	
+	return "%s\n/**\n *%s\n */" % (original, retVal)
+
+def make_name_js_safe(name):
+	if name == "default":
+		return "def"
+	return name
+
+def convert_type_to_string(val, lenient):
+	if type(val) is dict:
+		val = val["type"]
+	if type(val) is list:
+		retVal = "("
+		for v in val:
+			if type(v) is dict:
+				retVal = "%s%s|" % (retVal, convert_type_to_string(v["type"], lenient))
+			else:
+				retVal = "%s%s|" % (retVal, convert_type_to_string(v, lenient))
+		return "%s)" % retVal[:-1]
+	if val.find("Dictionary<") != -1:
+		return "!Object"
+	if val.find("Dictionary") != -1:
+		return "!Object"
+	if val.find("Callback<") != -1:
+		return "function(%s)" % val[9:-1]
+	if lenient and val.find("Titanium.") != -1:
+		val = "(%s|Object)" % val
+	return val.replace("<", ".<")
+
+def get_def_value_for_type(type):
+	if type == None:
+		return type
+	if type == "Number":
+		return "0"
+	elif type == "String":
+		return "''"
+	elif type == "Date":
+		return "new Date()"
+	elif type == "Boolean":
+		return "true"
+	elif type == "Object":
+		return "{}"
+	elif type == "Dictionary":
+		return "{}"
+	elif type == "Point":
+		return "{ x: 0, y: 0 }"
+	elif hasattr(type, "find"):
+		if type.find("Array<") != -1:
+			return "[]"
+		elif type.find("Callback<") != -1:
+			return "/** @extends %s */ function() { }" % type.replace("Callback<","").replace(">","")
+	return type
+
+def get_properties_for_object(object):
+	retVal = " "
+	
+	if "properties" in object and object["properties"] != None:
+		for property in object["properties"]:
+			retVal = get_jsdoc_for_object(retVal, property)
+			retVal = "%s\n\t'%s': %s," % (retVal, property["name"], get_def_value_for_type(property["type"]))
+	
+	if "methods" in object and object["methods"] != None:
+		for method in object["methods"]:
+			retVal = get_jsdoc_for_object(retVal, method)
+			args = ""
+			if "parameters" in method and method["parameters"]:
+				for parameter in method["parameters"]:
+					args = "%s%s," % (args, make_name_js_safe(parameter["name"]))
+				args = args[:-1]
+			retVal = "%s\n\t'%s': function(%s) { }," % (retVal, method["name"], args)
+	
+	return retVal[:-1]
+
+def dump(output_folder, keys, tree, f):
 	for key in keys:
 		var = key;
 		
@@ -200,10 +294,20 @@ def dump(keys, tree, f):
 			var = "%s']" % key.replace(".2", "['2")
 		elif key.find(".3") != -1:
 			var = "%s']" % key.replace(".3", "['3")
+		elif key == "Titanium":
+			var = "Titanium = Ti"
 		
-		f.write("%s = {%s\n};\n" % (var, dump_module(key, tree[key])))
-	
-	f.write("\nTi = Titanium;")
+		if var.find(".") == -1:
+			var = "var %s" % var
+		
+		output = "%s\n%s = {\n%s\n};\n" % (get_jsdoc_for_object("", tree[key]), var, get_properties_for_object(tree[key]))
+		if f == None:
+			output_file = os.path.join(output_folder, "%s-jsdoc.js" % key)
+			fi = open(output_file, "w")
+			fi.write(output)
+			fi.close()
+		else:
+			f.write(output)
 
 def generate(raw_apis, annotated_apis, options):
 	global all_annotated_apis, log
@@ -212,7 +316,7 @@ def generate(raw_apis, annotated_apis, options):
 	if options and options.verbose:
 		log_level = TiLogger.TRACE
 	log = TiLogger(None, level=log_level, output_stream=sys.stderr)
-	log.info("Generating VSDOC")
+	log.info("Generating JSDOC")
 
 	# Apply HTML annotations because we make use of some of them here.
 	html_generator.generate(raw_apis, annotated_apis, None)
@@ -222,12 +326,12 @@ def generate(raw_apis, annotated_apis, options):
 	keys.sort()
 	for key in keys:
 		one_api = annotated_apis[key]
-		# log.trace("Transforming %s to VSDOC" % key)
+		# log.trace("Transforming %s to JSDOC" % key)
 		tree[key] = transform_one_api(one_api)
 	if options.stdout:
-		dump(keys, tree, sys.stdout)
+		dump(None, keys, tree, sys.stdout)
 	else:
-		# Output to a file named api-vsdoc.js either in the folder
+		# Output to a file named api-jsdoc.js either in the folder
 		# specified by options.output or, if that's None, our
 		# standard dist/apidoc location where we also dump
 		# html output
@@ -243,10 +347,6 @@ def generate(raw_apis, annotated_apis, options):
 
 		if not output_folder:
 			log.warn("No output folder specified and dist path does not exist.  Forcing output to stdout.")
-			dump(keys, tree, sys.stdout)
+			dump(None, keys, tree, sys.stdout)
 		else:
-			output_file = os.path.join(output_folder, "api-vsdoc.js")
-			f = open(output_file, "w")
-			dump(keys, tree, f)
-			f.close()
-			log.info("%s written" % output_file)
+			dump(output_folder, keys, tree, None)
