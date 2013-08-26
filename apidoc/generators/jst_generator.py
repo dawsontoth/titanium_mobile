@@ -198,27 +198,40 @@ def get_doc_for_object(object):
 	
 	return clean_html_for_comment(''.join(retVal))
 
-def get_jst_for_property(key, property, type):
-	retVal = "[\n\t\t\t\t{"
+def get_jst_for_property(key, property, type, forFArgs):
+	# opening markup
+	if forFArgs:
+		indent = '\t\t\t\t\t\t\t\t'
+		retVal = "\n%s{" % indent
+	else:
+		indent = '\t\t\t\t'
+		retVal = "[\n%s{" % indent
 	
 	# guid
-	retVal = '%s\n\t\t\t\t\t"guid": "ti:%s.%s[0]"' % (retVal, key, property["name"])
+	if forFArgs:
+		retVal = '%s\n%s\t"id": "%s"' % (retVal, indent, property["name"])
+	else:
+		retVal = '%s\n%s\t"guid": "ti:%s.%s[0]"' % (retVal, indent, key, property["name"])
 	
 	# doc url
 	docUrl = "http://docs.appcelerator.com/titanium/latest/#!/api/%s-property-%s" % (key, property["name"])
-	retVal = '%s,\n\t\t\t\t\t"docUrl": "%s"' % (retVal, docUrl)
+	retVal = '%s,\n%s\t"docUrl": "%s"' % (retVal, indent, docUrl)
 	
 	# doc
-	retVal = '%s,\n\t\t\t\t\t"doc": "%s"' % (retVal, get_doc_for_object(property))
+	retVal = '%s,\n%s\t"doc": "%s"' % (retVal, indent, get_doc_for_object(property))
 	
-	# self properties
-	retVal = '%s,\n\t\t\t\t\t"properties": { "___proto__": [ "ti:%s.%s" ]}' % (retVal, key, type)
+	if forFArgs == False:
+		# self properties
+		retVal = '%s,\n%s\t"properties": { "___proto__": [ "ti:%s.%s" ]}' % (retVal, indent, key, type)
 	
-	retVal = "%s\n\t\t\t\t}\n\t\t\t]" % retVal
+	# closing markup
+	retVal = "%s\n%s}" % (retVal, indent)
+	if forFArgs == False:
+		retVal = '%s\n\t\t\t]' % retVal
 	return retVal
 
-def get_jst_for_method(key, method):
-	if key == "":
+def get_jst_for_method(tree, key, method):
+	if key == '':
 		indent = ''
 		retVal = "{"
 	else:
@@ -226,14 +239,14 @@ def get_jst_for_method(key, method):
 		retVal = "[\n%s\t{" % indent
 	
 	# guid
-	if key == "":
+	if key == '':
 		guid = '%s' % method["name"]
 	else:
 		guid = '%s.%s' % (key, method["name"])
 	retVal = '%s\n%s\t\t"guid": "ti:%s[0]"' % (retVal, indent, guid)
 	
 	# doc url
-	if key == "":
+	if key == '':
 		docUrl = "http://docs.appcelerator.com/titanium/latest/#!/api/Global-method-%s" % (method["name"])
 	else:
 		docUrl = "http://docs.appcelerator.com/titanium/latest/#!/api/%s-method-%s" % (key, method["name"])
@@ -244,17 +257,30 @@ def get_jst_for_method(key, method):
 	retVal = '%s,\n%s\t\t"doc": "%s"' % (retVal, indent, get_doc_for_object(method))
 	
 	# parameters
-	#{'description': None, 'deprecated': None, 'filename': 'Global.L-method.key-param', 'optional': False, 'summary': u'<p>Key used to lookup the localized string.</p>', 'type': 'String', 'name': 'key'}
-	#{ "id": "targetBuffer", "type": [ "es5:Object/prototype" ] }
 	retVal = '%s,\n%s\t\t"fargs": [' % (retVal, indent)
 	parameters = method["parameters"]
+	
 	isFirstP = True
 	for parameter in parameters:
 		if isFirstP:
 			isFirstP = False
 		else:
 			retVal = '%s,' % retVal
-		retVal = '%s\n%s\t\t\t{ "id": "%s", "type": [ "ti:%s" ] }' % (retVal, indent, parameter["name"], parameter["type"])
+		retVal = '%s\n%s\t\t\t{' % (retVal, indent)
+		retVal = '%s\n%s\t\t\t\t"id": "%s"' % (retVal, indent, parameter["name"])
+		retVal = '%s,\n%s\t\t\t\t"opt": %s' % (retVal, indent, ('%s' % parameter["optional"]).lower())
+		if parameter["type"][:10] == "Dictionary":
+			retVal = '%s,\n%s\t\t\t\t"type": [ "es5:Object/prototype" ]' % (retVal, indent)
+			tiType = parameter["type"][11:-1]
+			if tiType != '':
+				properties = get_properties_for_object(tree, False, tiType, tree[tiType], True)
+				if properties != '':
+					retVal = '%s,\n\t\t\t\t\t\t\t"properties": [%s\n\t\t\t\t\t\t\t]' % (retVal, properties)
+			
+		else:
+			retVal = '%s,\n%s\t\t\t\t"type": [ "ti:%s" ]' % (retVal, indent, parameter["type"])
+		retVal = '%s\n%s\t\t\t}' % (retVal, indent)
+	
 	retVal = '%s\n%s\t\t]' % (retVal, indent)
 	
 	# return value
@@ -263,7 +289,7 @@ def get_jst_for_method(key, method):
 		returns = returns[0]
 	retVal = '%s,\n%s\t\t"properties": { "_return": [ "ti:%s" ]}' % (retVal, indent, returns["type"])
 	
-	if key == "":
+	if key == '':
 		retVal = "%s\n%s\t}" % (retVal, indent)
 	else:
 		retVal = "%s\n%s\t}\n%s]" % (retVal, indent, indent)
@@ -317,11 +343,11 @@ def get_def_value_for_type(type):
 		if type.find("Array<") != -1:
 			return "[]"
 		elif type.find("Callback<") != -1:
-			return "/** @extends %s */ function() { }" % type.replace("Callback<","").replace(">","")
+			return "/** @extends %s */ function() { }" % type.replace("Callback<",'').replace(">",'')
 	return type
 
-def dump_sub_modules(tree, keys, key):
-	retVal = ""
+def dump_sub_modules(indent, tree, keys, key):
+	retVal = ''
 	
 	for subKey in keys:
 		isChild = subKey.startswith('%s.' % key)
@@ -329,32 +355,43 @@ def dump_sub_modules(tree, keys, key):
 		isDirectChild = subName.find('.') == -1
 		if isChild and isDirectChild:
 			# comma
-			if retVal != "":
+			if retVal != '':
 				retVal = "%s," % retVal
 			# key and value
-			retVal = '%s\n\t\t\t"_%s": %s' % (retVal, subName, get_jst_for_property(key, tree[subKey], subName))
+			retVal = '%s\n%s"_%s": %s' % (retVal, indent, subName, get_jst_for_property(key, tree[subKey], subName, False))
 	
 	return retVal
 
-def get_properties_for_object(tree, keys, key, object):
+def get_properties_for_object(tree, keys, key, object, forFArgs):
 	
-	retVal = dump_sub_modules(tree, keys, key)
+	if forFArgs:
+		indent = '\t\t\t\t\t\t\t\t'
+	else:
+		indent = '\t\t\t'
+	
+	if keys != False:
+		retVal = dump_sub_modules(indent, tree, keys, key)
+	else:
+		retVal = ''
 	
 	if "properties" in object and object["properties"] != None:
 		for property in object["properties"]:
 			# comma
-			if retVal != "":
+			if retVal != '':
 				retVal = "%s," % retVal
 			# key and value
-			retVal = '%s\n\t\t\t"_%s": %s' % (retVal, property["name"], get_jst_for_property(key, property, property["type"]))
+			if forFArgs:
+				retVal = '%s%s' % (retVal, get_jst_for_property(key, property, property["type"], forFArgs))
+			else:
+				retVal = '%s\n%s"_%s": %s' % (retVal, indent, property["name"], get_jst_for_property(key, property, property["type"], forFArgs))
 	
-	if "methods" in object and object["methods"] != None:
+	if forFArgs == False and "methods" in object and object["methods"] != None:
 		for method in object["methods"]:
 			# comma
-			if retVal != "":
+			if retVal != '':
 				retVal = "%s," % retVal
 			# key and value
-			retVal = '%s\n\t\t\t"_%s": %s' % (retVal, method["name"], get_jst_for_method(key, method))
+			retVal = '%s\n%s"_%s": %s' % (retVal, indent, method["name"], get_jst_for_method(tree, key, method))
 	
 	return retVal
 
@@ -376,8 +413,8 @@ def dump_one(f, keys, tree, key, printKeyAs):
 	f.write(',\n\t\t"doc": "%s"' % get_doc_for_object(tree[key]))
 	
 	# body
-	properties = get_properties_for_object(tree, keys, key, tree[key])
-	if properties != "":
+	properties = get_properties_for_object(tree, keys, key, tree[key], False)
+	if properties != '':
 		f.write(',\n\t\t"properties": {%s\n\t\t}' % properties)
 	
 	# close
@@ -406,7 +443,7 @@ def dump(output_folder, keys, tree, f):
 	if "methods" in glob and glob["methods"] != None:
 		for method in glob["methods"]:
 			# key and value
-			f.write(',\n\t"ti:%s": %s' % (method["name"], get_jst_for_method("", method)))
+			f.write(',\n\t"ti:%s": %s' % (method["name"], get_jst_for_method(tree, '', method)))
 	
 	f.write('\n}')
 	f.close()
