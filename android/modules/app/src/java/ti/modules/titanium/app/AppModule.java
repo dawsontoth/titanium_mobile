@@ -215,5 +215,21 @@ public class AppModule extends KrollModule
 			AccessibilityManagerCompat.addAccessibilityStateChangeListener(TiApplication.getInstance().getAccessibilityManager(), accessibilityStateChangeListener);
 		}
 	}
+	
+	private DebugTunnel tunnel = null;
+	
+	@Kroll.method
+	public void startDebugger(String host, int port) {
+		stopDebugger();
+		tunnel = new DebugTunnel(host, port);
+	}
+
+	@Kroll.method
+	public void stopDebugger() {
+		if (tunnel != null) {
+			tunnel.stop();
+			tunnel = null;
+		}
+	}
 
 }
