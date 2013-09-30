@@ -11,6 +11,7 @@
 #import "SBJSON.h"
 #import "ListenerEntry.h"
 #import "TiApp.h"
+#import "TiDebugger.h"
 #if defined(USE_TI_APPIOS)
 #import "TiAppiOSProxy.h"
 #endif
@@ -447,6 +448,14 @@ extern BOOL const TI_APPLICATION_ANALYTICS;
 	}
 }
 
+-(void)errored:(NSNotification *)notification
+{
+	if ([self _hasListeners:@"error"])
+	{
+		[self fireEvent:@"error" withObject:[notification userInfo]];
+	}
+}
+
 #pragma mark Delegate stuff
 
 -(void)proximityDetectionChanged:(NSNotification*)note
@@ -584,6 +593,22 @@ extern BOOL const TI_APPLICATION_ANALYTICS;
 -(id)analytics
 {
 	return NUMBOOL(TI_APPLICATION_ANALYTICS);
+}
+
+-(void)startDebugger:(id)args
+{
+	ENSURE_ARG_COUNT(args, 2);
+    NSString* h;
+    NSInteger p;
+	ENSURE_ARG_AT_INDEX(h, args, 0, NSString);
+    ENSURE_INT_AT_INDEX(p, args, 1);
+    [[TiApp app] setDebugMode:YES];
+    [[TiDebugger sharedDebugger] setOption:@"suspendOnFirstLine" value:@"false"];
+    TiDebuggerStart(h, p);
+}
+-(void)stopDebugger:(id)args
+{
+    TiDebuggerStop();
 }
 
 -(NSNumber*)keyboardVisible

@@ -767,6 +767,11 @@ CFMutableSetRef	krollBridgeRegistry = nil;
 
 -(id)require:(KrollContext*)kroll path:(NSString*)path
 {
+    if ([path isEqualToString:@"CLEAR-THE-MODULE-CACHE"]) {
+        [modules removeAllObjects];
+        return nil;
+    }
+
 	TiModule* module = nil;
 	NSData *data = nil;
 	NSString *filepath = nil;

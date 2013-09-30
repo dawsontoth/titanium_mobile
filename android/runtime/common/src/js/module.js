@@ -29,7 +29,7 @@ function Module(id, parent, context) {
 }
 kroll.Module = module.exports = Module;
 
-Module.cache = [];
+Module.cache = {};
 Module.main = null;
 Module.paths = [ 'Resources/' ];
 Module.wrap = NativeModule.wrap;
@@ -81,7 +81,12 @@ Module.prototype.load = function (filename, source) {
 	this.filename = filename;
 	this.paths = [path.dirname(filename)];
 
-	if (!source) {
+	try {
+		if (!source) {
+			source = assets.readFile(filename);
+		}
+	}
+	catch (err) {
 		source = assets.readAsset(filename);
 	}
 
@@ -202,6 +207,20 @@ Module.prototype.require = function (request, context, useCache) {
 	var cachedModule;
 	var externalCommonJsContents;
 	var located = false;
+
+	if (request === 'CLEAR-THE-MODULE-CACHE') {
+		var keys = Object.keys(Module.cache);
+		for (var k = 0, kL = keys.length; k < kL; k++) {
+			var key = keys[k];
+			Module.cache[key] = null;
+		}
+		return;
+	} else if (request.indexOf('ALTER-SEARCH-PATH') === 0) {
+		var newPath = request.substr('ALTER-SEARCH-PATH:'.length);
+		return Module.paths.unshift(newPath);
+	} else if (request === 'RESET-SEARCH-PATH') {
+		return Module.paths = [ 'Resources/' ];
+	}
 
 	var resolved = this.resolveFilename(request);
 
@@ -402,6 +421,9 @@ Module.prototype.resolveFilename = function (request) {
 	// could be located.
 	for (var i = 0, pathCount = paths.length; i < pathCount; ++i) {
 		var filename = path.resolve(paths[i], id) + '.js';
+		if (filename.indexOf('file:/' === 0)) {
+			filename = filename.replace('file:', '');
+		}
 		if (this.filenameExists(filename) || assets.fileExists(filename)) {
 			return [id, filename];
 		}

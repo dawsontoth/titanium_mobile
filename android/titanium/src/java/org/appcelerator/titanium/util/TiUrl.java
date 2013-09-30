@@ -246,7 +246,10 @@ public class TiUrl
 			if (!path.startsWith(PATH_SEPARATOR)) {
 				result = baseUrl + path;
 			} else {
-				result = scheme + PATH_SEPARATOR + path;
+				String oPath = TiApplication.getInstance().getAppProperties().getString("OVERRIDE_ROOT_PATH", "");
+				String oScheme = TiApplication.getInstance().getAppProperties().getString("OVERRIDE_ROOT_SCHEME", scheme);
+				if (oScheme.length() == 0) oScheme = scheme;
+				result = oScheme + PATH_SEPARATOR + PATH_SEPARATOR + oPath + path;
 			}
 		} else {
 			result = path;

@@ -490,6 +490,12 @@ DEFINE_EXCEPTIONS
         // why were we ever doing that in the first place...?
         if ([url_ isFileURL]) {
             UIImage* image = [UIImage imageWithContentsOfFile:[url_ path]];
+            if (image == nil) {
+                NSString *ourl = [TiUtils loadOverriddenResource:url_];
+                if (ourl != nil) {
+                    image = [UIImage imageWithContentsOfFile:ourl];
+                }
+            }
             if (image != nil) {
                 UIImage *imageToUse = [self rotatedImage:image];
                 autoWidth = imageToUse.size.width;

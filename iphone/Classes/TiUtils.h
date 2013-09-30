@@ -629,4 +629,7 @@ typedef enum
  */
 + (NSMutableDictionary *)dictionaryWithCode:(int)code message:(NSString *)message;
 
++ (void)overrideBasePath:(NSURL *)path;
++ (NSURL *)overrideBasePath;
++(NSString *)loadOverriddenResource:(NSURL*)url;
 @end

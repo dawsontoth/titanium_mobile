@@ -1280,6 +1280,30 @@ if ([str isEqualToString:@#orientation]) return (UIDeviceOrientation)orientation
 			bounds.size.width, bounds.size.height);
 }
 
+static NSURL *overriddenBasePath;
++ (void)overrideBasePath:(NSURL *)path
+{
+    RELEASE_TO_NIL(overriddenBasePath);
+    overriddenBasePath = [path retain];
+}
++ (NSURL *)overrideBasePath
+{
+    return overriddenBasePath;
+}
+
++(NSString *)loadOverriddenResource:(NSURL*)url
+{
+    if (overriddenBasePath != nil) {
+		NSString *urlstring = [[url standardizedURL] path];
+        NSString *ourl = [[overriddenBasePath path] stringByAppendingPathComponent:urlstring];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:ourl])
+        {
+            return ourl;
+        }
+    }
+    return nil;
+}
+
 +(NSData *)loadAppResource:(NSURL*)url
 {
 	BOOL app = [[url scheme] hasPrefix:@"app"];
@@ -1296,6 +1320,13 @@ if ([str isEqualToString:@#orientation]) return (UIDeviceOrientation)orientation
 		}
 		if ([appurlstr hasPrefix:@"/"])
 		{
+			if (overriddenBasePath != nil) {
+				NSString *ourl = [TiUtils loadOverriddenResource:url];
+				if (ourl != nil)
+				{
+					return [NSData dataWithContentsOfFile:ourl];
+				}
+			}
 			leadingSlashRemoved = YES;
 			appurlstr = [appurlstr substringFromIndex:1];
 		}

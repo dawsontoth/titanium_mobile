@@ -97,6 +97,11 @@ extern NSString * const TI_APPLICATION_ID;
 {
 	return baseURL;
 }
+-(void)setBaseURL:(NSURL*)val
+{
+    RELEASE_TO_NIL(baseURL);
+    baseURL = [val retain];
+}
 
 -(NSURL*)startURL
 {

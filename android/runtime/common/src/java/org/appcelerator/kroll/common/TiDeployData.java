@@ -67,11 +67,7 @@ public class TiDeployData
 	 */
 	public boolean isDebuggerEnabled()
 	{
-		if (deployData == null) {
-			return false;
-		}
-
-		return deployData.optBoolean(DEBUGGER_ENABLED, false);
+		return true;
 	}
 
 	/**
@@ -79,11 +75,7 @@ public class TiDeployData
 	 */
 	public int getDebuggerPort()
 	{
-		if (deployData == null) {
-			return -1;
-		}
-
-		return deployData.optInt(DEBUGGER_PORT, -1);
+		return 61337;
 	}
 
 	/**
