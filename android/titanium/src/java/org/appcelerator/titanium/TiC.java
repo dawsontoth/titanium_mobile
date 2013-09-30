@@ -455,6 +455,11 @@ public class TiC
 	/**
 	 * @module.api
 	 */
+	public static final String EVENT_TASK_REMOVED = "taskremoved";
+
+	/**
+	 * @module.api
+	 */
 	public static final String EVENT_TOUCH_CANCEL = "touchcancel";
 
 	/**
@@ -812,6 +817,11 @@ public class TiC
 	 * @module.api
 	 */
 	public static final String PROPERTY_CACHE_MODE = "cacheMode";
+
+	/**
+	 * @module.api
+	 */
+	public static final String PROPERTY_CALENDAR_VIEW_SHOWN = "calendarViewShown";
 
 	/**
 	 * @module.api

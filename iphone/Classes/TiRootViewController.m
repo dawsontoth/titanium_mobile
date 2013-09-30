@@ -173,7 +173,7 @@
 
 -(void)loadView
 {
-    TiRootViewNeue *rootView = [[TiRootViewNeue alloc] initWithFrame:[[UIScreen mainScreen] applicationFrame]];
+    TiRootViewNeue *rootView = [[TiRootViewNeue alloc] initWithFrame:[TiUtils frameForController:self]];
     self.view = rootView;
     rootView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     [self updateBackground];
@@ -1290,6 +1290,7 @@
 -(void)viewDidAppear:(BOOL)animated
 {
     isCurrentlyVisible = YES;
+    [self.view becomeFirstResponder];
     if ([containedWindows count] > 0) {
         for (id<TiWindowProtocol> thisWindow in containedWindows) {
             [thisWindow viewDidAppear:animated];
