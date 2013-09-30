@@ -29,3 +29,8 @@ EXTERN_FUNC void  TiDebuggerBeginScript(KrollContext*,const char*);
 EXTERN_FUNC void  TiDebuggerEndScript(KrollContext*);
 EXTERN_FUNC void  TiDebuggerLogMessage(DebuggerLogLevel level,NSString* message);
 EXTERN_FUNC void  TiDebuggerDiscoveryStart(NSString*, NSArray*, void(^)(NSString *, NSInteger));
+
+@interface TiDebugger : NSObject
++(TiDebugger*)sharedDebugger;
+-(void)setOption:(NSString*)name value:(NSString*)value;
+@end

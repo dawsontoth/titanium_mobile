@@ -181,7 +181,7 @@ JNIEXPORT void JNICALL Java_org_appcelerator_kroll_runtime_v8_V8Runtime_nativeIn
 		dispatchDebugMessage = env->GetMethodID(v8RuntimeClass, "dispatchDebugMessages", "()V");
 
 		Debug::SetDebugMessageDispatchHandler(dispatchHandler);
-		Debug::EnableAgent("titanium", debuggerPort, true);
+		Debug::EnableAgent("titanium", debuggerPort, false);
 	}
 
 	LOG_HEAP_STATS(TAG);
