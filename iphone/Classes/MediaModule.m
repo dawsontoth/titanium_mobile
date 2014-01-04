@@ -1371,6 +1371,11 @@ MAKE_SYSTEM_PROP(VIDEO_FINISH_REASON_USER_EXITED,MPMovieFinishReasonUserExited);
     return [NSNumber numberWithUnsignedInt:[[TiMediaAudioSession sharedSession] sessionMode]];
 }
 
+-(void)setDucking:(NSNumber*)mode
+{
+    [[TiMediaAudioSession sharedSession] setDucking:[mode unsignedIntValue]];
+}
+
 #pragma mark Delegates
 
 - (void)imagePickerController:(UIImagePickerController *)picker_ didFinishPickingMediaWithInfo:(NSDictionary *)editingInfo
