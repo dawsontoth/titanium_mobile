@@ -139,7 +139,13 @@
         if ((top + bottom) >= maxHeight) {
             bottom = maxHeight - (top + 1);
         }
-        stretchableImage = [[theImage resizableImageWithCapInsets:UIEdgeInsetsMake(top, left, bottom, right) resizingMode:UIImageResizingModeStretch] retain];
+        if ([UIImage instancesRespondToSelector:@selector(resizableImageWithCapInsets:resizingMode:)]) {
+            stretchableImage = [[theImage resizableImageWithCapInsets:UIEdgeInsetsMake(top, left, bottom, right) resizingMode:UIImageResizingModeStretch] retain];                    
+        } else {
+            // iOS 5! Oh no! Well, let's tile. It's better than crashing, don't you agree?
+            stretchableImage = [[theImage resizableImageWithCapInsets:UIEdgeInsetsMake(top, left, bottom, right)] retain];
+        }
+        
         recapStretchableImage = NO;
     }
 	return stretchableImage;

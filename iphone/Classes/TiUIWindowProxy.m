@@ -439,14 +439,25 @@
     if (theImage == nil) {
         [ourNB setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
     } else {
-        UIImage* resizableImage = [theImage resizableImageWithCapInsets:UIEdgeInsetsMake(0, 0, 0, 0) resizingMode:UIImageResizingModeStretch];
+        UIImage* resizableImage;
+        if ([UIImage instancesRespondToSelector:@selector(resizableImageWithCapInsets:resizingMode:)]) {
+            resizableImage = [theImage resizableImageWithCapInsets:UIEdgeInsetsMake(0, 0, 0, 0) resizingMode:UIImageResizingModeStretch];                    
+        } else {
+            // iOS 5! Oh no! Well, let's tile. It's better than crashing, don't you agree?
+            resizableImage = [theImage resizableImageWithCapInsets:UIEdgeInsetsMake(0, 0, 0, 0)];
+        }
         [ourNB setBackgroundImage:resizableImage forBarMetrics:UIBarMetricsDefault];
         //You can only set up the shadow image with a custom background image.
         id shadowImageValue = [self valueForUndefinedKey:@"shadowImage"];
         theImage = [TiUtils toImage:shadowImageValue proxy:self];
         
         if (theImage != nil) {
-            UIImage* resizableImage = [theImage resizableImageWithCapInsets:UIEdgeInsetsMake(0, 0, 0, 0) resizingMode:UIImageResizingModeStretch];
+            if ([UIImage instancesRespondToSelector:@selector(resizableImageWithCapInsets:resizingMode:)]) {
+                resizableImage = [theImage resizableImageWithCapInsets:UIEdgeInsetsMake(0, 0, 0, 0) resizingMode:UIImageResizingModeStretch];
+            } else {
+                // iOS 5! Oh no! Well, let's tile. It's better than crashing, don't you agree?
+                resizableImage = [theImage resizableImageWithCapInsets:UIEdgeInsetsMake(0, 0, 0, 0)];
+            }
             ourNB.shadowImage = resizableImage;
         } else {
             BOOL clipValue = [TiUtils boolValue:[self valueForUndefinedKey:@"hideShadow"] def:NO];
