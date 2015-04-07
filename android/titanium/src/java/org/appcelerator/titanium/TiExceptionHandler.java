@@ -84,7 +84,7 @@ public class TiExceptionHandler implements Handler.Callback, KrollExceptionHandl
 		dict.put("line", error.line);
 		dict.put("lineSource", error.lineSource);
 		dict.put("lineOffset", error.lineOffset);
-		TiApplication.getInstance().fireAppEvent("error", dict);
+		TiApplication.getInstance().fireAppEvent("uncaughtException", dict);
 	}
 
 	protected static void createDialog(final ExceptionMessage error)

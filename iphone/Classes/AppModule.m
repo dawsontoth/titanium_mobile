@@ -453,9 +453,9 @@ extern BOOL const TI_APPLICATION_ANALYTICS;
 
 -(void)errored:(NSNotification *)notification
 {
-	if ([self _hasListeners:@"error"])
+	if ([self _hasListeners:@"uncaughtException"])
 	{
-		[self fireEvent:@"error" withObject:[notification userInfo]];
+		[self fireEvent:@"uncaughtException" withObject:[notification userInfo]];
 	}
 }
 

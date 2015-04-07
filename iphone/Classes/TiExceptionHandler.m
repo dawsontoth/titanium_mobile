@@ -56,9 +56,9 @@ static NSUncaughtExceptionHandler *prevUncaughtExceptionHandler = NULL;
 
 - (void)showScriptError:(TiScriptError *)error
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kTiErrorNotification
-                                                        object:self
-                                                      userInfo:error.dictionaryValue];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kTiErrorNotification
+	                                                    object:self
+	                                                  userInfo:error.dictionaryValue];
 }
 
 #pragma mark - TiExceptionHandlerDelegate
